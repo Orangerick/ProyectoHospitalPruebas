@@ -1,0 +1,78 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso | Sistema Hospital</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🏥 Hospital Salud</h1>
+                <p id="auth-subtitle">Inicia sesión para continuar</p>
+            </div>
+
+            <!-- Formulario de Login -->
+            <div id="login-section">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="login-user" placeholder="Ingresa tu usuario">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-pass" placeholder="••••••••">
+                </div>
+                <button class="btn-primary" id="btn-login">Entrar al Sistema</button>
+                <div class="auth-footer">
+                    <a href="#" id="go-recover">¿Olvidaste tu contraseña?</a><br>
+                    <span>¿Eres nuevo? <a href="#" id="go-register">Regístrate como paciente</a></span>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro (Solo Pacientes - Regla 3) -->
+            <div id="register-section" class="hidden">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="reg-nombre" placeholder="Ej. Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" placeholder="juan@correo.com">
+                </div>
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="reg-user" placeholder="juan123">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="reg-pass" placeholder="Crea una clave segura">
+                </div>
+                <button class="btn-success" id="btn-register-confirm">Crear mi Cuenta</button>
+                <div class="auth-footer">
+                    <span>¿Ya tienes cuenta? <a href="#" id="back-to-login">Inicia sesión</a></span>
+                </div>
+            </div>
+
+            <!-- Recuperación Simbólica (HU5) -->
+            <div id="recover-section" class="hidden">
+                <p>Ingresa tu correo para recuperar tu acceso.</p>
+                <div class="form-group">
+                    <input type="email" id="recover-email" placeholder="tu@correo.com">
+                </div>
+                <button class="btn-warning" id="btn-recover-send">Enviar Instrucciones</button>
+                <div class="auth-footer">
+                    <a href="#" id="recover-back">Volver</a>
+                </div>
+            </div>
+
+            <div id="auth-msg" class="alert hidden"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/views/login.view.js"></script>
+</body>
+</html>
