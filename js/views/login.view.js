@@ -40,17 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('recover-back').onclick = (e) => {
         e.preventDefault();
+        // Resetear el estado de los pasos al volver
+        document.getElementById('recover-step-1').classList.remove('hidden');
+        document.getElementById('recover-step-2').classList.add('hidden');
         sections.recover.classList.add('hidden');
         sections.login.classList.remove('hidden');
+        document.getElementById('auth-subtitle').textContent = 'Inicia sesión para continuar';
     };
 
     // --- Acciones de Auth ---
     document.getElementById('btn-login').onclick = () => {
-        const u = document.getElementById('login-user').value;
+        const email = document.getElementById('login-email').value.trim();
         const p = document.getElementById('login-pass').value;
-        if (!u || !p) return showMsg("Ingresa usuario y contraseña.");
+        if (!email || !p) return showMsg("Ingresa tu correo y contraseña.");
         try {
-            Auth.login(u, p);
+            Auth.login(email, p);
         } catch (e) {
             showMsg(e.message);
         }
@@ -58,14 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-register-confirm').onclick = () => {
         const datos = {
-            nombre: document.getElementById('reg-nombre').value,
-            email: document.getElementById('reg-email').value,
-            user: document.getElementById('reg-user').value,
+            nombre: document.getElementById('reg-nombre').value.trim(),
+            email: document.getElementById('reg-email').value.trim(),
+            telefono: document.getElementById('reg-tel').value.trim(),
+            user: document.getElementById('reg-email').value.trim(), // Asignamos el email como "usuario" interno
             pass: document.getElementById('reg-pass').value
         };
 
-        if (!datos.nombre || !datos.user || !datos.pass) {
+        if (!datos.nombre || !datos.email || !datos.telefono || !datos.pass) {
             return showMsg("Completa todos los campos obligatorios.");
+        }
+
+        const regexTelefono = /^\d{10}$/;
+        if (!regexTelefono.test(datos.telefono)) {
+            return showMsg("El teléfono debe contener exactamente 10 dígitos numéricos.");
         }
 
         try {
@@ -77,12 +87,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    document.getElementById('btn-recover-send').onclick = () => {
-        const email = document.getElementById('recover-email').value;
-        if (!email) return showMsg("Ingresa un correo electrónico.");
+    // --- Lógica de Recuperación en 2 Pasos (HU5) ---
+    document.getElementById('btn-recover-next').onclick = () => {
+        const tel = document.getElementById('recover-tel').value.trim();
+        if (!tel) return showMsg("Ingresa tu número de teléfono.");
+
         try {
-            const res = Auth.recuperarPassword(email);
-            showMsg(res, "success");
+            const correoOculto = Auth.obtenerCorreoOculto(tel);
+            // Inyectar correo ofuscado y cambiar de paso
+            document.getElementById('recover-hint').textContent = `Confirma tu correo: ${correoOculto}`;
+            document.getElementById('recover-step-1').classList.add('hidden');
+            document.getElementById('recover-step-2').classList.remove('hidden');
+        } catch (e) {
+            showMsg(e.message);
+        }
+    };
+
+    document.getElementById('btn-recover-save').onclick = () => {
+        const tel = document.getElementById('recover-tel').value.trim();
+        const email = document.getElementById('recover-email-full').value.trim();
+        const pass = document.getElementById('recover-new-pass').value;
+
+        if (!email || !pass) return showMsg("Completa todos los campos obligatorios.");
+
+        try {
+            Auth.validarYCambiarPassword(tel, email, pass);
+            showMsg("¡Contraseña actualizada con éxito! Redirigiendo...", "success");
+            
+            // Volver al login tras un breve retraso
+            setTimeout(() => {
+                document.getElementById('recover-back').click();
+            }, 2000);
         } catch (e) {
             showMsg(e.message);
         }

@@ -8,9 +8,9 @@ const DB = {
     // Estado inicial del sistema
     state: {
         usuarios: [
-            { id: 'admin_1', user: 'admin', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
-            { id: 'usr_doc_test', user: 'doctor', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
-            { id: 'usr_pac_test', user: 'paciente', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
+            { id: 'admin_1', user: 'admin', email: 'admin@hospital.mx', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
+            { id: 'usr_doc_test', user: 'doctor', email: 'doctor@hospital.mx', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
+            { id: 'usr_pac_test', user: 'paciente', email: 'paciente@hospital.mx', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
         ],
         pacientes: [
             { id: 'pac_test', usuarioId: 'usr_pac_test', nombre: 'Juan Prueba', email: 'juan@prueba.com', telefono: '555-1234', fechaRegistro: new Date().toISOString(), activo: true }
@@ -38,9 +38,9 @@ const DB = {
             
             // Asegurar que los usuarios de prueba existan/se actualicen (solo para desarrollo)
             const testUsers = [
-                { id: 'admin_1', user: 'admin', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
-                { id: 'usr_doc_test', user: 'doctor', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
-                { id: 'usr_pac_test', user: 'paciente', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
+                { id: 'admin_1', user: 'admin', email: 'admin@hospital.mx', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
+                { id: 'usr_doc_test', user: 'doctor', email: 'doctor@hospital.mx', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
+                { id: 'usr_pac_test', user: 'paciente', email: 'paciente@hospital.mx', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
             ];
 
             testUsers.forEach(tu => {

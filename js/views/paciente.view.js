@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('p-nombre').value = miPerfil.nombre;
         document.getElementById('p-email').value = miPerfil.email;
         document.getElementById('p-tel').value = miPerfil.telefono;
+        document.getElementById('p-direccion').value = miPerfil.direccion || '';
     };
 
     // Modal Citas
@@ -129,13 +130,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('btn-save-perfil').onclick = () => {
-        const datos = {
-            nombre: document.getElementById('p-nombre').value,
-            email: document.getElementById('p-email').value,
-            telefono: document.getElementById('p-tel').value
-        };
-        PacientesModulo.actualizarPaciente(miPerfil.id, datos);
-        alert("Perfil actualizado.");
+        const nuevaDir = document.getElementById('p-direccion').value.trim();
+        
+        if (!nuevaDir) {
+            alert("Por favor, ingresa una dirección válida.");
+            return;
+        }
+
+        const exito = PacientesModulo.actualizarDireccion(miPerfil.id, nuevaDir);
+        
+        if (exito) {
+            alert("¡Perfil actualizado con éxito! Tu dirección ha sido sincronizada.");
+            renderSection('sec-perfil'); // Refrescar datos en pantalla
+        }
     };
 
     document.getElementById('btn-logout').onclick = () => Auth.logout();

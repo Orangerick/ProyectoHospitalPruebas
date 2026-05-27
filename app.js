@@ -232,8 +232,6 @@
     document.getElementById('tabSupervision').style.display = esAdmin ? 'inline-block' : 'none';
     document.getElementById('tabEsquema').style.display = esAdmin ? 'inline-block' : 'none';
     showTab('dashboard');
-    sincronizarPerfil();
-    cargarPerfil();
     renderTodo();
     actualizarSessionInfo();
   }
@@ -253,8 +251,6 @@
     document.getElementById('tabSupervision').style.display = esAdmin ? 'inline-block' : 'none';
     document.getElementById('tabEsquema').style.display = esAdmin ? 'inline-block' : 'none';
     showTab('dashboard');
-    sincronizarPerfil();
-    cargarPerfil();
     renderTodo();
     actualizarSessionInfo();
   }
@@ -602,103 +598,6 @@ function delCita(id) {
     document.getElementById('h_titulo').value = ''; document.getElementById('h_detalle').value = '';
     document.getElementById('h_cita').value = '';
     guardar(); renderHistorial();
-  }
-
-  // ============ PERFIL ============
-  function cargarPerfil() {
-    const u = datos.usuarios.find(x => x.user === sesion.user);
-    if (!u) return;
-    document.getElementById('pf_user').value = u.user;
-    document.getElementById('pf_rol').value = u.rol;
-    document.getElementById('pf_nombre').value = u.nombre || '';
-    document.getElementById('pf_email').value = u.email || '';
-    document.getElementById('pf_tel').value = u.telefono || '';
-    document.getElementById('pf_direccion').value = u.direccion || '';
-    const med = datos.medicos.find(m => m.usuario_id === u.user);
-    document.getElementById('pf_esp').value = med ? especialidadDe(med) : '';
-    document.getElementById('pf_cedula').value = med ? med.cedula_professional : '';
-    document.getElementById('rowEspecialidad').style.display = u.rol === 'doctor' ? 'grid' : 'none';
-    document.getElementById('pf_esp').disabled = true;
-    document.getElementById('pf_cedula').disabled = true;
-    const hint = document.getElementById('hintMedico');
-    if (hint) {
-      if (u.rol === 'doctor' && !med) hint.textContent = 'ℹ️ Aún no estás registrado en la tabla MEDICOS. Pídele a un admin que te dé de alta en la sección Médicos.';
-      else if (u.rol === 'doctor' && med) hint.textContent = '✅ Estás registrado como médico. Para cambiar tu especialidad o cédula, ve a la sección Médicos.';
-      else hint.textContent = '';
-    }
-    pintarAvatar('avatarPerfil', u);
-  }
-  function pintarAvatar(elId, u) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    if (u && u.foto) el.innerHTML = `<img src="${u.foto}" alt="">`;
-    else el.innerHTML = iniciales(u ? u.nombre : '?');
-  }
-  function sincronizarPerfil() {
-    const u = datos.usuarios.find(x => x.user === sesion.user);
-    if (!u) return;
-    document.getElementById('userLabel').textContent = u.nombre || u.user;
-    document.getElementById('roleLabel').textContent = u.rol;
-    pintarAvatar('avatarTop', u);
-  }
-  function cargarFoto(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    if (f.size > 1024 * 1024) { alert('Máximo 1MB'); return; }
-    const r = new FileReader();
-    r.onload = () => {
-      const u = datos.usuarios.find(x => x.user === sesion.user);
-      if (!u) return;
-      u.foto = r.result;
-      log('Foto de perfil actualizada', sesion.user, '');
-      guardar();
-      pintarAvatar('avatarPerfil', u);
-      sincronizarPerfil();
-    };
-    r.readAsDataURL(f);
-  }
-  function actualizarPerfil() {
-    const u = datos.usuarios.find(x => x.user === sesion.user);
-    if (!u) return;
-    const nombre = document.getElementById('pf_nombre').value.trim();
-    const email = document.getElementById('pf_email').value.trim();
-    const tel = document.getElementById('pf_tel').value.trim();
-    const dir = document.getElementById('pf_direccion').value.trim();
-    if (!nombre) { alert('El nombre no puede estar vacío'); return; }
-    if (!validarEmail(email)) { alert('Correo inválido'); return; }
-    u.nombre = nombre; u.email = email; u.telefono = tel; u.direccion = dir;
-    log('Perfil actualizado', sesion.user, '');
-    guardar();
-    sincronizarPerfil();
-    renderTodo();
-    document.getElementById('okPerfil').textContent = '✓ Perfil sincronizado en todo el sistema';
-    setTimeout(() => document.getElementById('okPerfil').textContent = '', 2500);
-  }
-  function checkPwdPerfil() {
-    const p = document.getElementById('pf_passNueva').value;
-    const v = validarPwd(p);
-    const bar = document.getElementById('pwdBarPf');
-    const colors = ['#d32f2f','#ff9800','#fbc02d','#7cb342','#4caf50'];
-    bar.style.width = (v.nivel * 20) + '%';
-    bar.style.background = colors[Math.min(v.nivel-1, 4)] || '#ccc';
-  }
-  function cambiarPassword() {
-    const u = datos.usuarios.find(x => x.user === sesion.user);
-    const actual = document.getElementById('pf_passActual').value;
-    const n1 = document.getElementById('pf_passNueva').value;
-    const n2 = document.getElementById('pf_passNueva2').value;
-    const err = document.getElementById('errPass'); const ok = document.getElementById('okPass');
-    err.textContent = ''; ok.textContent = '';
-    if (hashPwd(actual) !== u.pass) { err.textContent = 'Contraseña actual incorrecta'; return; }
-    const v = validarPwd(n1);
-    if (!v.ok) { err.textContent = v.msg; return; }
-    if (n1 !== n2) { err.textContent = 'Las contraseñas no coinciden'; return; }
-    u.pass = hashPwd(n1);
-    log('Cambio de contraseña', sesion.user, '');
-    guardar();
-    ok.textContent = '✓ Contraseña actualizada';
-    ['pf_passActual','pf_passNueva','pf_passNueva2'].forEach(i => document.getElementById(i).value='');
-    document.getElementById('pwdBarPf').style.width = '0%';
   }
 
   // ============ USUARIOS ============
