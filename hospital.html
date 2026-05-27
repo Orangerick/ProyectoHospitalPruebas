@@ -29,18 +29,29 @@
     </div>
 
     <div id="formRegister" class="hidden">
-      <input type="text" id="r_user" placeholder="Usuario (mín. 4 caracteres)">
-      <input type="text" id="r_nombre" placeholder="Nombre completo">
-      <input type="email" id="r_email" placeholder="Correo electrónico">
-      <input type="password" id="r_pass" placeholder="Contraseña" oninput="checkPwd()">
-      <div class="pwd-strength"><div id="pwdBar" style="width:0%; background:#ccc;"></div></div>
-      <p id="pwdMsg" style="font-size:12px; color:#666; min-height:16px;"></p>
-      <input type="password" id="r_pass2" placeholder="Confirmar contraseña">
-      
-      <button onclick="registrar()">Crear cuenta</button>
-      <p id="errReg" class="error"></p>
-      <p id="okReg" class="success"></p>
-    </div>
+  <input type="text" id="r_nombre" placeholder="Nombre completo">
+  <input type="email" id="r_email" placeholder="Correo electrónico (será tu usuario)">
+  <input type="text" id="r_tel" placeholder="Número telefónico">
+  <input type="text" id="r_curp" placeholder="CURP">
+  <input type="password" id="r_pass" placeholder="Contraseña" oninput="checkPwd()">
+  <div class="pwd-strength"><div id="pwdBar" style="width:0%; background:#ccc;"></div></div>
+  <p id="pwdMsg" style="font-size:12px; color:#666; min-height:16px;"></p>
+  <input type="password" id="r_pass2" placeholder="Confirmar contraseña">
+  
+  <select id="r_pregunta" style="margin-top:10px;">
+    <option value="">¿Pregunta de seguridad?</option>
+    <option value="Mascota">¿Nombre de tu primera mascota?</option>
+    <option value="Escuela">¿Nombre de tu primera escuela?</option>
+    <option value="Color">¿Cuál es tu color favorito?</option>
+  </select>
+  <input type="text" id="r_respuesta" placeholder="Respuesta secreta">
+  
+  <button onclick="registrar()" style="margin-top:10px;">Crear cuenta</button>
+  <p id="errReg" class="error"></p>
+  <p id="okReg" class="success"></p>
+  
+  <button class="btn-small" onclick="recuperarPassword()" style="background:none; border:none; color:#1976d2; cursor:pointer; text-decoration:underline;">¿Olvidaste tu contraseña?</button>
+</div>
   </div>
 </div>
 

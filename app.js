@@ -148,42 +148,94 @@
     msg.style.color = v.ok ? '#4caf50' : '#d32f2f';
   }
   
-  function registrar() {
-    const user = document.getElementById('r_user').value.trim();
+   function registrar() {
+    // 1. Capturamos los campos del formulario actualizado
     const nombre = document.getElementById('r_nombre').value.trim();
     const email = document.getElementById('r_email').value.trim();
+    const tel = document.getElementById('r_tel').value.trim();
+    const curp = document.getElementById('r_curp').value.trim().toUpperCase();
+    const pregunta = document.getElementById('r_pregunta').value;
+    const respuesta = document.getElementById('r_respuesta').value.trim().toLowerCase();
     const p1 = document.getElementById('r_pass').value;
     const p2 = document.getElementById('r_pass2').value;
     
-    // FORZAMOS A QUE SIEMPRE SEA PACIENTE
     const rol = 'paciente'; 
-    const err = document.getElementById('errReg'); const ok = document.getElementById('okReg');
+    const err = document.getElementById('errReg'); 
+    const ok = document.getElementById('okReg');
     err.textContent = ''; ok.textContent = '';
     
-    if (user.length < 4) { err.textContent = 'Usuario mínimo 4 caracteres'; return; }
-    if (!nombre) { err.textContent = 'Nombre requerido'; return; }
+    // 2. Validaciones
+    if (!nombre || !email || !tel || !curp || !pregunta || !respuesta) { 
+        err.textContent = 'Todos los campos son obligatorios'; return; 
+    }
     if (!validarEmail(email)) { err.textContent = 'Correo inválido'; return; }
+    if (tel.length < 10) { err.textContent = 'Teléfono inválido'; return; }
+    
     const pv = validarPwd(p1);
     if (!pv.ok) { err.textContent = pv.msg; return; }
     if (p1 !== p2) { err.textContent = 'Las contraseñas no coinciden'; return; }
-    if (datos.usuarios.some(u => u.user === user)) { err.textContent = 'Ese usuario ya existe'; return; }
+    if (datos.usuarios.some(u => u.user === email)) { err.textContent = 'Ese correo ya está registrado'; return; }
     
-    // 1. Crear su cuenta de usuario para login
-    datos.usuarios.push({ user, nombre, email, rol, pass: hashPwd(p1), telefono:'', direccion:'', foto:'', activo: true, creado: Date.now() });
+    // 3. Crear cuenta de usuario (el email es el user)
+    datos.usuarios.push({ 
+        user: email, 
+        nombre, 
+        email, 
+        rol, 
+        pass: hashPwd(p1), 
+        telefono: tel, 
+        seguridad: { pregunta, respuesta },
+        direccion:'', foto:'', activo: true, creado: Date.now() 
+    });
     
-    // 2. Darlo de alta en la lista de pacientes automáticamente (Nota de Chris - HU1)
+    // 4. Alta en lista de pacientes
     const idPaciente = Date.now();
-    datos.pacientes.push({ id: idPaciente, usuario_id: user, nombre: nombre, edad: null, genero: 'O', diag: 'Pendiente de diagnóstico', tel: '', alergias: '' });
-    datos.historiales[idPaciente] = []; // Preparamos su historial vacío
+    datos.pacientes.push({ 
+        id: idPaciente, 
+        usuario_id: email, 
+        nombre: nombre, 
+        edad: null, 
+        genero: 'O', 
+        diag: 'Pendiente de diagnóstico', 
+        tel: tel, 
+        curp: curp,
+        alergias: '' 
+    });
+    datos.historiales[idPaciente] = [];
     
-    log('Registro de nuevo paciente', user, 'Alta automática en sistema');
+    log('Registro de nuevo paciente', email, 'Alta automática con seguridad H5');
     guardar();
     
     ok.textContent = 'Cuenta creada. Ya puedes iniciar sesión.';
-    ['r_user','r_nombre','r_email','r_pass','r_pass2'].forEach(id => document.getElementById(id).value = '');
+    // Limpieza de campos (r_user ya no existe)
+    ['r_nombre','r_email','r_tel','r_curp','r_pregunta','r_respuesta','r_pass','r_pass2'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+    });
     document.getElementById('pwdBar').style.width = '0%';
     document.getElementById('pwdMsg').textContent = '';
     setTimeout(() => switchAuth('login'), 1500);
+}
+
+  function logout() {
+    destruirToken();
+    document.getElementById('sistema').classList.add('hidden');
+    document.getElementById('login').classList.remove('hidden');
+    document.getElementById('user').value = ''; document.getElementById('pass').value = '';
+    document.getElementById('err').textContent = ''; switchAuth('login');
+  }
+  function mostrarSistema() {
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('sistema').classList.remove('hidden');
+    const esAdmin = sesion.rol === 'admin';
+    document.getElementById('tabUsuarios').style.display = esAdmin ? 'inline-block' : 'none';
+    document.getElementById('tabSupervision').style.display = esAdmin ? 'inline-block' : 'none';
+    document.getElementById('tabEsquema').style.display = esAdmin ? 'inline-block' : 'none';
+    showTab('dashboard');
+    sincronizarPerfil();
+    cargarPerfil();
+    renderTodo();
+    actualizarSessionInfo();
   }
 
   function logout() {
@@ -247,7 +299,10 @@
     datos.pacientes = datos.pacientes.filter(x => x.id !== id);
     delete datos.historiales[id];
     datos.citas = datos.citas.filter(c => c.pid !== id); 
+    
+    // NUEVO: Registro de auditoría para HU10
     if (p) log('Baja de paciente', sesion.user, p.nombre + ' (cascada)');
+    
     guardar(); renderTodo();
   }
 
@@ -386,40 +441,97 @@
   }
 
   // ============ CITAS ============
-  function addCita() {
-    const pid = document.getElementById('c_paciente').value;
-    const mid = document.getElementById('c_medico').value; 
-    const fecha = document.getElementById('c_fecha').value;
-    const hora = document.getElementById('c_hora').value;
-    const motivo = document.getElementById('c_motivo').value.trim();
-    if (!pid || !mid || !fecha || !hora || !motivo) { alert('Completa todos los campos'); return; }
-    datos.citas.push({ id: Date.now(), pid:+pid, mid, fecha, hora, motivo, estado:'Pendiente' });
-    log('Cita agendada', sesion.user, fecha + ' ' + hora);
-    ['c_paciente','c_medico','c_fecha','c_hora','c_motivo'].forEach(i => document.getElementById(i).value='');
-    guardar(); renderTodo();
+
+// Validación de disponibilidad (HU27)
+function isDisponible(medico_id, fecha, hora) {
+  return !datos.citas.some(c => 
+    c.mid === medico_id && 
+    c.fecha === fecha && 
+    c.hora === hora && 
+    c.estado !== 'Cancelada'
+  );
+}
+
+// Validación de fecha futura (HU16)
+function isFechaValida(fecha, hora) {
+  const citaDateTime = new Date(`${fecha}T${hora}`);
+  return citaDateTime > new Date();
+}
+
+function addCita() {
+  const pid = document.getElementById('c_paciente').value;
+  const mid = document.getElementById('c_medico').value; 
+  const fecha = document.getElementById('c_fecha').value;
+  const hora = document.getElementById('c_hora').value;
+  const motivo = document.getElementById('c_motivo').value.trim();
+  
+  if (!pid || !mid || !fecha || !hora || !motivo) { alert('Completa todos los campos'); return; }
+  
+  // Aplicamos las validaciones de Chris (H16 y H27)
+  if (!isFechaValida(fecha, hora)) {
+    alert('Error: La fecha/hora no puede ser anterior al momento actual.');
+    return;
   }
-  function cambiarEstadoCita(id) {
-    const c = datos.citas.find(x => x.id === id);
-    if (!c) return;
-    const estados = ['Pendiente','Atendida','Cancelada'];
-    c.estado = estados[(estados.indexOf(c.estado)+1) % estados.length];
-    
-    // NUEVO: Registrar en la auditoría el cambio de estado
-    log('Estado de cita modificado', sesion.user, `Cita ID: ${id} cambió a ${c.estado}`);
-    
-    guardar(); renderTodo();
+  if (!isDisponible(mid, fecha, hora)) {
+    alert('Error: El médico ya tiene una cita ocupada en ese horario.');
+    return;
   }
 
-  function delCita(id) {
-    if (!confirm('¿Eliminar cita?')) return;
-    datos.citas = datos.citas.filter(x => x.id !== id);
-    
-    // NUEVO: Registrar en la auditoría que se borró una cita
-    log('Cita eliminada', sesion.user, `Cita ID: ${id}`);
-    
+  datos.citas.push({ id: Date.now(), pid:+pid, mid, fecha, hora, motivo, estado:'Pendiente' });
+  log('Cita agendada', sesion.user, fecha + ' ' + hora);
+  ['c_paciente','c_medico','c_fecha','c_hora','c_motivo'].forEach(i => document.getElementById(i).value='');
+  guardar(); renderTodo();
+}
+
+function cambiarEstadoCita(id) {
+  const c = datos.citas.find(x => x.id === id);
+  if (!c) return;
+  const estados = ['Pendiente','Atendida','Cancelada'];
+  c.estado = estados[(estados.indexOf(c.estado)+1) % estados.length];
+  log('Estado de cita modificado', sesion.user, `Cita ID: ${id} cambió a ${c.estado}`);
+  guardar(); renderTodo();
+}
+
+// Función para cancelar cita (HU18)
+function cancelarCita(id) {
+  const cita = datos.citas.find(c => c.id === id);
+  if (cita) {
+    cita.estado = 'Cancelada';
+    log('Cita cancelada', sesion.user, `Cita ID: ${id}`);
     guardar(); renderTodo();
   }
+}
+// Función para reprogramar cita (HU19)
+function reprogramarCita(id, nuevaFecha, nuevaHora) {
+  const cita = datos.citas.find(c => c.id === id);
+  if (!cita) return;
+  
+  // Validamos antes de aplicar el cambio
+  if (!isFechaValida(nuevaFecha, nuevaHora)) {
+    alert('Error: La fecha/hora nueva es inválida.'); 
+    return;
+  }
+  
+  if (!isDisponible(cita.mid, nuevaFecha, nuevaHora)) {
+    alert('Error: El médico ya tiene una cita en ese nuevo horario.'); 
+    return;
+  }
+  
+  // Si todo está bien, actualizamos
+  cita.fecha = nuevaFecha;
+  cita.hora = nuevaHora;
+  
+  log('Cita reprogramada', sesion.user, `Cita ID: ${id} nueva fecha: ${nuevaFecha} ${nuevaHora}`);
+  guardar(); 
+  renderTodo();
+}
 
+function delCita(id) {
+  if (!confirm('¿Eliminar cita?')) return;
+  datos.citas = datos.citas.filter(x => x.id !== id);
+  log('Cita eliminada', sesion.user, `Cita ID: ${id}`);
+  guardar(); renderTodo();
+}
  // ============ HISTORIAL ============
   function renderSelectHistorial() {
     const sel = document.getElementById('h_paciente');
@@ -746,9 +858,22 @@
     const t = document.getElementById('tablaPacientes');
     const v = document.getElementById('vacioPacientes');
     const buscar = (document.getElementById('buscarPaciente')?.value || '').toLowerCase();
+    
+    if (!t) return;
     t.innerHTML = '';
-    const filtrados = datos.pacientes.filter(p => !buscar || p.nombre.toLowerCase().includes(buscar) || p.diag.toLowerCase().includes(buscar));
-    if (!filtrados.length) { v.style.display = 'block'; v.textContent = datos.pacientes.length ? 'Sin resultados.' : 'No hay pacientes registrados.'; return; }
+    
+    const filtrados = datos.pacientes.filter(p => 
+      !buscar || 
+      p.nombre.toLowerCase().includes(buscar) || 
+      p.diag.toLowerCase().includes(buscar)
+    );
+
+    if (!filtrados.length) { 
+      v.style.display = 'block'; 
+      v.textContent = datos.pacientes.length ? 'Sin resultados.' : 'No hay pacientes registrados.'; 
+      return; 
+    }
+    
     v.style.display = 'none';
     
     filtrados.forEach((p, i) => {
@@ -758,7 +883,7 @@
       const btnToggle = u ? `<button class="btn-warning btn-small" onclick="toggleUsuario('${u.user}')">${u.activo ? 'Deshabilitar' : 'Habilitar'}</button>` : '';
 
       t.innerHTML += `<tr>
-        <td>${i+1}</td>
+        <td>${i + 1}</td>
         <td>${p.nombre}<br><small>${estadoStr}</small></td>
         <td>${p.edad || '-'}</td>
         <td>${p.genero}</td>
@@ -797,18 +922,49 @@
       </tr>`;
     });
   }
-  function renderCitas() {
+ function renderCitas() {
     const t = document.getElementById('tablaCitas'); const v = document.getElementById('vacioCitas');
     t.innerHTML = '';
     if (!datos.citas.length) { v.style.display = 'block'; return; }
     v.style.display = 'none';
+    
     datos.citas.forEach((c, i) => {
       const p = datos.pacientes.find(x => x.id === c.pid);
       const m = datos.medicos.find(x => x.usuario_id === c.mid);
       const colorEstado = c.estado === 'Atendida' ? '#4caf50' : c.estado === 'Cancelada' ? '#d32f2f' : '#ff9800';
-      t.innerHTML += `<tr><td>${i+1}</td><td>${p ? p.nombre : '(eliminado)'}</td><td>${m ? nombreMedico(m) : '(eliminado)'}</td><td>${c.fecha}</td><td>${c.hora}</td><td>${c.motivo}</td><td><span style="background:${colorEstado};color:white;padding:3px 8px;border-radius:3px;font-size:11px;cursor:pointer;" onclick="cambiarEstadoCita(${c.id})">${c.estado}</span></td><td><button class="btn-danger btn-small" onclick="delCita(${c.id})">Eliminar</button></td></tr>`;
+      
+      // Construimos los botones de acción dinámicamente
+      let acciones = `<button class="btn-danger btn-small" onclick="delCita(${c.id})">Eliminar</button>`;
+      
+      if (c.estado !== 'Cancelada') {
+        acciones = `
+          <button class="btn-small" style="background:#d32f2f; color:white;" onclick="cancelarCita(${c.id})">🚫</button>
+          <button class="btn-small" style="background:#1976d2; color:white;" onclick="promptReprogramar(${c.id})">📅</button>
+          ${acciones}
+        `;
+      }
+
+      t.innerHTML += `<tr>
+        <td>${i+1}</td>
+        <td>${p ? p.nombre : '(eliminado)'}</td>
+        <td>${m ? nombreMedico(m) : '(eliminado)'}</td>
+        <td>${c.fecha}</td>
+        <td>${c.hora}</td>
+        <td>${c.motivo}</td>
+        <td><span style="background:${colorEstado};color:white;padding:3px 8px;border-radius:3px;font-size:11px;cursor:pointer;" onclick="cambiarEstadoCita(${c.id})">${c.estado}</span></td>
+        <td>${acciones}</td>
+      </tr>`;
     });
+}
+
+// Auxiliar para el prompt de reprogramación
+function promptReprogramar(id) {
+  const nuevaFecha = prompt("Introduce la nueva fecha (YYYY-MM-DD):");
+  const nuevaHora = prompt("Introduce la nueva hora (HH:MM):");
+  if (nuevaFecha && nuevaHora) {
+    reprogramarCita(id, nuevaFecha, nuevaHora);
   }
+}
 
   function renderUsuarios() {
     const t = document.getElementById('tablaUsuarios');
