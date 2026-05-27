@@ -1,0 +1,22 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cargando... | Sistema Hospital</title>
+    <script type="module">
+        import Auth from './js/core/auth.js';
+        // Verificar sesión al cargar
+        Auth.checkGuard();
+        // Si hay sesión, redirigir al panel correcto
+        const sesion = JSON.parse(sessionStorage.getItem('hospital_sesion'));
+        if (sesion) {
+            Auth.redirectByRol(sesion.rol);
+        } else {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>

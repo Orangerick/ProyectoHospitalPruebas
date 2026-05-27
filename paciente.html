@@ -1,0 +1,119 @@
+<!-- paciente.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel | Hospital Salud</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header"><h2>🏥 Mi Salud</h2></div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="sec-mis-citas">📅 Mis Citas</a>
+                <a href="#" class="nav-item" data-section="sec-historial">📋 Mi Historial</a>
+                <a href="#" class="nav-item" data-section="sec-perfil">👤 Mi Perfil</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="btn-logout" class="btn-logout">Cerrar Sesión</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <h1 id="section-title">Mis Citas Médicas</h1>
+                <div class="user-profile"><span id="paciente-name">Paciente</span></div>
+            </header>
+
+            <div class="content-body">
+                <!-- Mis Citas -->
+                <section id="sec-mis-citas" class="content-section">
+                    <div class="section-header">
+                        <h2>Próximas Citas</h2>
+                        <button class="btn-primary" id="btn-nueva-cita">+ Agendar Cita</button>
+                    </div>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Médico</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-citas-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Historial Clínico (Lectura) -->
+                <section id="sec-historial" class="content-section hidden">
+                    <h2>Mi Expediente Clínico</h2>
+                    <div id="historial-timeline" class="timeline"></div>
+                </section>
+
+                <!-- Perfil (HU4) -->
+                <section id="sec-perfil" class="content-section hidden">
+                    <div class="card">
+                        <h3>Editar Mis Datos</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="p-nombre">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="p-email">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="text" id="p-tel">
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="btn-save-perfil">Actualizar Perfil</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Agendar (Regla 6) -->
+    <div id="modal-cita" class="modal hidden">
+        <div class="modal-content">
+            <h3>Nueva Cita Médica</h3>
+            <div class="form-group">
+                <label>Médico / Especialidad</label>
+                <select id="c-medico"></select>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="c-fecha">
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <select id="c-hora">
+                        <option>09:00</option><option>10:00</option><option>11:00</option>
+                        <option>12:00</option><option>16:00</option><option>17:00</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Motivo de consulta</label>
+                <input type="text" id="c-motivo" placeholder="Ej. Dolor abdominal">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-cita">Cancelar</button>
+                <button class="btn-primary" id="btn-confirmar-cita">Confirmar Cita Ahora</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/views/paciente.view.js"></script>
+</body>
+</html>
