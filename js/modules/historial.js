@@ -46,6 +46,27 @@ const HistorialModulo = {
     },
 
     /**
+     * Editar una entrada existente del historial clínico
+     */
+    editarRegistro(registroId, nuevosDatos) {
+        const registro = DB.state.historiales.find(h => h.id === registroId);
+        if (!registro) throw new Error("No se encontró el registro clínico.");
+
+        // Actualizamos los campos
+        if (nuevosDatos.tipo) registro.tipo = nuevosDatos.tipo;
+        if (nuevosDatos.titulo) registro.titulo = nuevosDatos.titulo;
+        if (nuevosDatos.detalle) registro.detalle = nuevosDatos.detalle;
+
+        // Sobreescribimos en la base de datos
+        DB.update('historiales', registroId, registro);
+        
+        // Log de auditoría para saber que alguien modificó un expediente
+        DB.registrarLog('Historial Editado', `Se modificó el registro ${registroId}`);
+        
+        return registro;
+    },
+
+    /**
      * Obtener historial completo de un paciente
      */
     obtenerHistorialPaciente(pacienteId) {

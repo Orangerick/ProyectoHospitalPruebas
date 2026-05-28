@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 5. Historial Clínico
+// 5. Historial Clínico
     const verHistorial = (pacienteId) => {
         const pac = DB.state.pacientes.find(p => p.id === pacienteId);
         if(!pac) return;
@@ -164,11 +164,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (historial.length === 0) {
             container.innerHTML = "<p>No hay registros clínicos para este paciente.</p>";
         } else {
+            // AQUÍ AGREGAMOS EL BOTÓN DE EDITAR A CADA TARJETA
             container.innerHTML = historial.map(h => `
                 <div class="card" style="margin-bottom: 1rem; border-left: 4px solid var(--primary);">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <strong>${h.tipo}: ${h.titulo}</strong>
-                        <small>${formatearFecha(h.fecha)}</small>
+                        <div style="text-align: right;">
+                            <small>${formatearFecha(h.fecha)}</small><br>
+                            <button class="btn-warning btn-small" onclick="abrirEdicionHistorial('${h.id}')" style="margin-top: 5px;">✏️ Editar</button>
+                        </div>
                     </div>
                     <p style="margin-top:0.5rem; font-size: 0.9rem; color:#334155;">${h.detalle}</p>
                     <div style="font-size:0.7rem; color:#64748b; margin-top:0.5rem; text-align:right;">
@@ -182,6 +186,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-close-historial').onclick = () => {
         document.getElementById('modal-ver-historial').classList.add('hidden');
+    };
+
+    // --- NUEVA LÓGICA DE EDICIÓN ---
+    window.abrirEdicionHistorial = (registroId) => {
+        const registro = DB.state.historiales.find(h => h.id === registroId);
+        if (!registro) return;
+        
+        document.getElementById('edit-hist-id').value = registro.id;
+        document.getElementById('edit-hist-tipo').value = registro.tipo;
+        document.getElementById('edit-hist-titulo').value = registro.titulo;
+        document.getElementById('edit-hist-detalle').value = registro.detalle;
+        
+        // Ocultamos la vista de historial y abrimos el modal de edición
+        document.getElementById('modal-ver-historial').classList.add('hidden');
+        document.getElementById('modal-editar-historial').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-edit-hist').onclick = () => {
+        document.getElementById('modal-editar-historial').classList.add('hidden');
+        document.getElementById('modal-ver-historial').classList.remove('hidden'); // Volvemos a la vista anterior
+    };
+
+    document.getElementById('btn-save-edit-hist').onclick = () => {
+        const id = document.getElementById('edit-hist-id').value;
+        const nuevosDatos = {
+            tipo: document.getElementById('edit-hist-tipo').value,
+            titulo: document.getElementById('edit-hist-titulo').value,
+            detalle: document.getElementById('edit-hist-detalle').value
+        };
+
+        try {
+            HistorialModulo.editarRegistro(id, nuevosDatos);
+            alert("Registro actualizado correctamente.");
+            
+            document.getElementById('modal-editar-historial').classList.add('hidden');
+            
+            // Recargamos el historial para ver los cambios reflejados inmediatamente
+            const registroActualizado = DB.state.historiales.find(h => h.id === id);
+            verHistorial(registroActualizado.pacienteId);
+        } catch (e) {
+            alert(e.message);
+        }
     };
 
     // 6. Perfil Médico

@@ -149,6 +149,33 @@
         </div>
     </div>
 
+    <div id="modal-editar-historial" class="modal hidden">
+        <div class="modal-content">
+            <h3>Editar Registro Clínico</h3>
+            <input type="hidden" id="edit-hist-id">
+            <div class="form-group">
+                <label>Tipo de Registro</label>
+                <select id="edit-hist-tipo">
+                    <option value="Consulta">Consulta General</option>
+                    <option value="Diagnóstico">Diagnóstico</option>
+                    <option value="Tratamiento">Tratamiento</option>
+                    <option value="Receta">Receta Médica</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Título / Resumen</label>
+                <input type="text" id="edit-hist-titulo">
+            </div>
+            <div class="form-group">
+                <label>Detalle Clínico</label>
+                <textarea id="edit-hist-detalle" rows="5" style="width:100%; padding:10px; border-radius:6px; border:1px solid #e2e8f0;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-edit-hist">Cancelar</button>
+                <button class="btn-warning" id="btn-save-edit-hist">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
     <script type="module" src="js/views/medico.view.js"></script>
 </body>
 </html>
