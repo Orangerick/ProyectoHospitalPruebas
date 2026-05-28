@@ -10,10 +10,43 @@ const Auth = {
      * Intenta iniciar sesión
      */
     login(email, password) {
-        const usuario = DB.state.usuarios.find(u => u.email === email && u.pass === hashPwd(password));
+        // Buscamos al usuario primero solo por email
+        const usuario = DB.state.usuarios.find(u => u.email === email);
         
         if (!usuario) throw new Error("Credenciales incorrectas");
+        
+        // Validación de bloqueo (Excepto para el admin)
+        if (usuario.rol !== 'admin' && usuario.bloqueado) {
+            throw new Error("Tu cuenta está bloqueada por múltiples intentos fallidos. Contacta al administrador.");
+        }
+
         if (!usuario.activo) throw new Error("Tu cuenta está desactivada. Contacta al administrador.");
+
+        // Verificamos contraseña
+        if (usuario.pass !== hashPwd(password)) {
+            // Lógica de intentos solo para NO administradores
+            if (usuario.rol !== 'admin') {
+                const nuevosIntentos = (usuario.intentosFallidos || 0) + 1;
+                let mensajeError = "Credenciales incorrectas";
+
+                if (nuevosIntentos >= 3) {
+                    DB.update('usuarios', usuario.id, { intentosFallidos: nuevosIntentos, bloqueado: true });
+                    DB.registrarLog('Cuenta Bloqueada', `El usuario ${email} ha sido bloqueado tras 3 intentos fallidos.`);
+                    throw new Error("Tu cuenta ha sido bloqueada tras 3 intentos fallidos. Contacta al administrador.");
+                } else {
+                    DB.update('usuarios', usuario.id, { intentosFallidos: nuevosIntentos });
+                    mensajeError += `. Intentos restantes: ${3 - nuevosIntentos}`;
+                }
+                throw new Error(mensajeError);
+            } else {
+                throw new Error("Credenciales incorrectas");
+            }
+        }
+
+        // Si el login es exitoso, reiniciamos intentos (si no es admin, aunque para admin no estorba)
+        if (usuario.intentosFallidos > 0) {
+            DB.update('usuarios', usuario.id, { intentosFallidos: 0 });
+        }
 
         const sesion = {
             id: usuario.id,

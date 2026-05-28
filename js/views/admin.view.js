@@ -52,19 +52,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const renderPacientes = () => {
         const body = document.getElementById('table-pacientes-body');
-        body.innerHTML = DB.state.pacientes.map(p => `
+        body.innerHTML = DB.state.pacientes.map(p => {
+            const user = DB.state.usuarios.find(u => u.id === p.usuarioId);
+            const isBlocked = user ? user.bloqueado : false;
+            return `
             <tr>
                 <td>${p.nombre}</td>
                 <td>${p.email}</td>
                 <td>${p.telefono}</td>
-                <td><span class="badge ${p.activo ? 'badge-success' : 'badge-danger'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+                <td>
+                    <span class="badge ${p.activo ? 'badge-success' : 'badge-danger'}">${p.activo ? 'Activo' : 'Inactivo'}</span>
+                    ${isBlocked ? '<span class="badge badge-danger">Bloqueado</span>' : ''}
+                </td>
                 <td>
                     <button class="btn-primary btn-small btn-edit-p" data-id="${p.id}">Editar</button>
                     <button class="btn-warning btn-small btn-toggle-p" data-id="${p.id}">${p.activo ? 'Desactivar' : 'Activar'}</button>
                     <button class="btn-danger btn-small btn-delete-p" data-id="${p.id}">Eliminar</button>
+                    ${isBlocked ? `<button class="btn-success btn-small btn-unlock-p" data-id="${p.id}">Desbloquear</button>` : ''}
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
 
         // Eventos de la lista
         document.querySelectorAll('.btn-toggle-p').forEach(btn => {
@@ -87,6 +95,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
         });
+
+        // Evento de Desbloqueo delegando a la Capa de Negocio
+        document.querySelectorAll('.btn-unlock-p').forEach(btn => {
+            btn.onclick = () => {
+                const p = DB.state.pacientes.find(x => x.id === btn.dataset.id);
+                if (p && confirm('¿Deseas desbloquear la cuenta de este paciente?')) {
+                    try {
+                        PacientesModulo.desbloquearCuenta(p.usuarioId, p.email);
+                        renderPacientes();
+                    } catch (error) {
+                        alert(error.message);
+                    }
+                }
+            };
+        });
     };
 
     const renderMedicos = () => {
@@ -94,15 +117,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         body.innerHTML = DB.state.medicos.map(m => {
             const user = DB.state.usuarios.find(u => u.id === m.usuarioId);
             const esp = DB.state.especialidades.find(e => e.id === m.especialidadId);
+            const isBlocked = user ? user.bloqueado : false;
             return `
                 <tr>
                     <td>${user ? user.nombre : 'N/A'}</td>
                     <td>${esp ? esp.nombre : 'N/A'}</td>
                     <td>${m.cedula}</td>
-                    <td><span class="badge ${m.activo ? 'badge-success' : 'badge-danger'}">${m.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <span class="badge ${m.activo ? 'badge-success' : 'badge-danger'}">${m.activo ? 'Activo' : 'Inactivo'}</span>
+                        ${isBlocked ? '<span class="badge badge-danger">Bloqueado</span>' : ''}
+                    </td>
                     <td>
                         <button class="btn-primary btn-small btn-edit-m" data-id="${m.id}">Editar</button>
                         <button class="btn-warning btn-small btn-toggle-m" data-id="${m.id}">${m.activo ? 'Desactivar' : 'Activar'}</button>
+                        ${isBlocked ? `<button class="btn-success btn-small btn-unlock-m" data-id="${m.id}">Desbloquear</button>` : ''}
                     </td>
                 </tr>
             `;
@@ -116,9 +144,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         });
 
-        // Evento para abrir modal de edición
         document.querySelectorAll('.btn-edit-m').forEach(btn => {
             btn.onclick = () => abrirModalEdicionMedico(btn.dataset.id);
+        });
+
+        // Evento de Desbloqueo delegando a la Capa de Negocio
+        document.querySelectorAll('.btn-unlock-m').forEach(btn => {
+            btn.onclick = () => {
+                const m = DB.state.medicos.find(x => x.id === btn.dataset.id);
+                if (m && confirm('¿Deseas desbloquear la cuenta de este médico?')) {
+                    try {
+                        MedicosModulo.desbloquearCuenta(m.usuarioId, m.email);
+                        renderMedicos();
+                    } catch (error) {
+                        alert(error.message);
+                    }
+                }
+            };
         });
     };
 

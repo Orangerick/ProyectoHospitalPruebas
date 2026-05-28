@@ -127,6 +127,24 @@ const MedicosModulo = {
      */
     obtenerEspecialidades() {
         return DB.state.especialidades;
+    },
+
+    /**
+     * Desbloquea la cuenta de un médico que excedió los intentos de login
+     */
+    desbloquearCuenta(usuarioId, email) {
+        if (!usuarioId) throw new Error("ID de usuario no proporcionado.");
+        
+        const success = DB.update('usuarios', usuarioId, { 
+            bloqueado: false, 
+            intentosFallidos: 0 
+        });
+
+        if (success) {
+            DB.registrarLog('Cuenta Desbloqueada', `El administrador desbloqueó al médico ${email}`);
+        } else {
+            throw new Error("No se pudo desbloquear la cuenta. Usuario no encontrado.");
+        }
     }
 };
 
