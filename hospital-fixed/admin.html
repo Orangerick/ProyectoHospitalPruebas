@@ -1,0 +1,273 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo | Hospital Salud</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="sec-stats">📊 Resumen</a>
+                <a href="#" class="nav-item" data-section="sec-pacientes">🧑‍⚕️ Pacientes</a>
+                <a href="#" class="nav-item" data-section="sec-medicos">👨‍⚕️ Médicos</a>
+                <a href="#" class="nav-item" data-section="sec-especialidades">🩺 Especialidades</a>
+                <a href="#" class="nav-item" data-section="sec-auditoria">📜 Auditoría</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="btn-logout" class="btn-logout">⇤ Cerrar Sesión</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 id="section-title">Resumen del Sistema</h1>
+                <div class="user-profile">
+                    <span id="admin-name">Administrador</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Seccion: Resumen -->
+                <section id="sec-stats" class="content-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Pacientes</h3>
+                            <p id="stat-pacientes">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Médicos</h3>
+                            <p id="stat-medicos">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Citas Hoy</h3>
+                            <p id="stat-citas">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seccion: Pacientes -->
+                <section id="sec-pacientes" class="content-section hidden">
+                    <div class="section-header">
+                        <h2>Gestión de Pacientes</h2>
+                        <button class="btn-primary" id="btn-open-paciente-modal">+ Nuevo Paciente</button>
+                    </div>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-pacientes-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Seccion: Médicos -->
+                <section id="sec-medicos" class="content-section hidden">
+                    <div class="section-header">
+                        <h2>Gestión de Médicos</h2>
+                        <button class="btn-primary" id="btn-open-medico-modal">+ Nuevo Médico</button>
+                    </div>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Especialidad</th>
+                                    <th>Cédula</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-medicos-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Seccion: Especialidades -->
+                <section id="sec-especialidades" class="content-section hidden">
+                    <div class="section-header">
+                        <h2>Especialidades</h2>
+                        <div class="form-inline">
+                            <input type="text" id="new-esp-name" placeholder="Nueva Especialidad">
+                            <button class="btn-success" id="btn-add-especialidad">Agregar</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <ul id="list-especialidades" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- Seccion: Auditoría -->
+                <section id="sec-auditoria" class="content-section hidden">
+                    <div class="section-header">
+                        <h2>Log de Auditoría</h2>
+                        <button class="btn-danger btn-small" id="btn-clear-logs">Limpiar Todo</button>
+                    </div>
+                    <div class="card">
+                        <table class="data-table small">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Acción</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-logs-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Médico (Regla 4) -->
+    <div id="modal-medico" class="modal hidden">
+        <div class="modal-content">
+            <h3>Registrar Profesional Médico</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="m-nombre">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico (Login)</label>
+                    <input type="email" id="m-email">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="m-tel" placeholder="10 dígitos" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="m-pass">
+                </div>
+                <div class="form-group">
+                    <label>Cédula Profesional</label>
+                    <input type="text" id="m-cedula" placeholder="7-10 dígitos">
+                </div>
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <select id="m-especialidad"></select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-medico">Cancelar</button>
+                <button class="btn-primary" id="btn-save-medico">Guardar Médico</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Paciente (Registro Admin) -->
+    <div id="modal-paciente" class="modal hidden">
+        <div class="modal-content">
+            <h3>Registrar Nuevo Paciente</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="ap-nombre" placeholder="Ej. Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="ap-email" placeholder="correo@ejemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono (10 dígitos)</label>
+                    <input type="tel" id="ap-tel" placeholder="5512345678" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña Temporal</label>
+                    <input type="password" id="ap-pass" placeholder="••••••••">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-paciente">Cancelar</button>
+                <button class="btn-primary" id="btn-save-paciente">Guardar Paciente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles/Edición Paciente (HU8 y HU9) -->
+    <div id="modal-detalle-paciente" class="modal hidden">
+        <div class="modal-content">
+            <h3>Detalles / Editar Paciente</h3>
+            <input type="hidden" id="edit-p-id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="edit-p-nombre">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="edit-p-email">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="edit-p-tel" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" id="edit-p-direccion" placeholder="Calle, número, colonia">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-edit-paciente">Cancelar</button>
+                <button class="btn-danger" id="btn-delete-paciente-modal">Eliminar Paciente</button>
+                <button class="btn-primary" id="btn-update-paciente">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles/Edición Medico (HU13 y HU14) -->
+    <div id="modal-detalle-medico" class="modal hidden">
+        <div class="modal-content">
+            <h3>Detalles / Editar Médico</h3>
+            <input type="hidden" id="edit-m-id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="edit-m-nombre">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico (Login)</label>
+                    <input type="email" id="edit-m-email">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="edit-m-tel" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Cédula Profesional</label>
+                    <input type="text" id="edit-m-cedula">
+                </div>
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <select id="edit-m-especialidad"></select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-edit-medico">Cancelar</button>
+                <button class="btn-primary" id="btn-update-medico">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/views/admin.view.js"></script>
+</body>
+</html>
