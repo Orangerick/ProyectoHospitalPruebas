@@ -1,23 +1,23 @@
 # 🏥 Sistema Médico - Proyecto Ap Hospital
 
-## 📋 Descripción del Proyecto
+## Descripción del Proyecto
 Este sistema es una plataforma de gestión hospitalaria desarrollada bajo una arquitectura **Multipágina (MPA)**. Su objetivo principal es automatizar la atención médica, la gestión de pacientes y la administración de registros clínicos, eliminando intermediarios y permitiendo que los pacientes gestionen sus citas directamente mediante la disponibilidad en tiempo real.
 
 ---
 
-## 👥 Equipo de Desarrollo: "Tortugas Ninja"
+## Equipo de Desarrollo: "Tortugas Ninja"
 
 1. **Arrieta Flores Alan Alejandro** - Dev 1
 2. **Barrera Jiménez Christian** - Product Owner(Dios del software)
 3. **Hernandez Perez Obet** - Scrum Master
 4. **Martinez Figueroa Erick** - Dev 2
-5. **Leonardo** - Dev 3
-6. **Alan** - Dev 4
+5. **Romero Hernandez Leonardo** - Dev 3
+6. **Martinez Alan Alberto** - Dev 4
 7. **Ruiz Carmona Emiliano** - Dev 5
 
 ---
 
-## 🛠️ Tecnologías
+## Tecnologías
 * **Frontend:** HTML5, CSS3, JavaScript (Vanilla ES6+).
 * [cite_start]**Persistencia:** Firebase / LocalStorage (Capa `DB.js`)[cite: 26, 48].
 * [cite_start]**Arquitectura:** MPA (Separación de Vistas y Lógica de Negocio)[cite: 27, 49].
