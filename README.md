@@ -11,8 +11,8 @@ Este sistema es una plataforma de gestión hospitalaria desarrollada bajo una ar
 2. **Barrera Jiménez Christian** - Product Owner(Dios del software)
 3. **Hernandez Perez Obet** - Scrum Master
 4. **Martinez Figueroa Erick** - Dev 2
-5. **Romero Hernandez Leonardo** - Dev 3
-6. **Martinez Alan Alberto** - Dev 4
+5. **Martinez Alan Alberto** - Dev 3
+6. **Romero Hernandez Leonardo** - Dev 4
 7. **Ruiz Carmona Emiliano** - Dev 5
 
 ---
