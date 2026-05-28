@@ -101,17 +101,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${m.cedula}</td>
                     <td><span class="badge ${m.activo ? 'badge-success' : 'badge-danger'}">${m.activo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
+                        <button class="btn-primary btn-small btn-edit-m" data-id="${m.id}">Editar</button>
                         <button class="btn-warning btn-small btn-toggle-m" data-id="${m.id}">${m.activo ? 'Desactivar' : 'Activar'}</button>
                     </td>
                 </tr>
             `;
         }).join('');
 
+        // Eventos
         document.querySelectorAll('.btn-toggle-m').forEach(btn => {
             btn.onclick = () => {
                 MedicosModulo.toggleEstado(btn.dataset.id);
                 renderMedicos();
             };
+        });
+
+        // Evento para abrir modal de edición
+        document.querySelectorAll('.btn-edit-m').forEach(btn => {
+            btn.onclick = () => abrirModalEdicionMedico(btn.dataset.id);
         });
     };
 
@@ -137,35 +144,98 @@ document.addEventListener('DOMContentLoaded', async () => {
         `).join('');
     };
 
-    // 4. Modal de Médicos (Regla 4)
+    // 4. Modal de Médicos (Regla 4 y HU11)
     const modal = document.getElementById('modal-medico');
     document.getElementById('btn-open-medico-modal').onclick = () => {
         // Cargar especialidades en el select
         const select = document.getElementById('m-especialidad');
-        select.innerHTML = DB.state.especialidades.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+        select.innerHTML = MedicosModulo.obtenerEspecialidades().map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
         modal.classList.remove('hidden');
     };
 
     document.getElementById('btn-close-medico').onclick = () => modal.classList.add('hidden');
 
     document.getElementById('btn-save-medico').onclick = () => {
+        const telRegex = /^\d{10}$/;
         const datos = {
-            nombre: document.getElementById('m-nombre').value,
-            user: document.getElementById('m-user').value,
+            nombre: document.getElementById('m-nombre').value.trim(),
+            // Se eliminó m-user, se agregó m-tel
+            telefono: document.getElementById('m-tel').value.trim(),
             pass: document.getElementById('m-pass').value,
-            email: document.getElementById('m-email').value,
-            cedula: document.getElementById('m-cedula').value,
+            email: document.getElementById('m-email').value.trim(),
+            cedula: document.getElementById('m-cedula').value.trim(),
             especialidadId: document.getElementById('m-especialidad').value
         };
+
+        if (!telRegex.test(datos.telefono)) {
+            return alert("El teléfono debe contener exactamente 10 dígitos.");
+        }
 
         try {
             MedicosModulo.registrarMedico(datos);
             modal.classList.add('hidden');
             renderMedicos();
-            // Limpiar campos
-            ['m-nombre','m-user','m-pass','m-email','m-cedula'].forEach(id => document.getElementById(id).value = '');
+            // Limpiar campos actualizados
+            ['m-nombre','m-tel','m-pass','m-email','m-cedula'].forEach(id => document.getElementById(id).value = '');
         } catch (e) {
             alert(e.message);
+        }
+    };
+
+    // --- Lógica de Edición de Médicos (HU13, HU14 y HU33) ---
+    const modalEdicionMedico = document.getElementById('modal-detalle-medico');
+
+    const abrirModalEdicionMedico = (id) => {
+        const m = MedicosModulo.obtenerMedico(id);
+        if (!m) return;
+
+        // Llenar datos de texto
+        document.getElementById('edit-m-id').value = m.id;
+        document.getElementById('edit-m-nombre').value = m.nombre;
+        document.getElementById('edit-m-email').value = m.email;
+        document.getElementById('edit-m-tel').value = m.telefono || '';
+        document.getElementById('edit-m-cedula').value = m.cedula;
+
+        // HU33: Cargar especialidades y pre-seleccionar la del médico
+        const selectEsp = document.getElementById('edit-m-especialidad');
+        const especialidades = MedicosModulo.obtenerEspecialidades();
+
+        selectEsp.innerHTML = especialidades.map(e =>
+            `<option value="${e.id}" ${e.id === m.especialidadId ? 'selected' : ''}>${e.nombre}</option>`
+        ).join('');
+
+        modalEdicionMedico.classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-edit-medico').onclick = () => modalEdicionMedico.classList.add('hidden');
+
+    document.getElementById('btn-update-medico').onclick = () => {
+        const id = document.getElementById('edit-m-id').value;
+        const telRegex = /^\d{10}$/;
+
+        const datos = {
+            nombre: document.getElementById('edit-m-nombre').value.trim(),
+            email: document.getElementById('edit-m-email').value.trim(),
+            telefono: document.getElementById('edit-m-tel').value.trim(),
+            cedula: document.getElementById('edit-m-cedula').value.trim(),
+            especialidadId: document.getElementById('edit-m-especialidad').value
+        };
+
+        if (!datos.nombre || !datos.email || !datos.telefono || !datos.cedula) {
+            return alert("Todos los campos son obligatorios.");
+        }
+
+        if (!telRegex.test(datos.telefono)) {
+            return alert("El teléfono debe contener exactamente 10 dígitos.");
+        }
+
+        try {
+            MedicosModulo.actualizarMedico(id, datos);
+            alert("Información del médico actualizada correctamente.");
+            modalEdicionMedico.classList.add('hidden');
+            renderMedicos();
+        } catch (e) {
+            alert(e.message); // Mostrará el error si el correo ya existe
         }
     };
 

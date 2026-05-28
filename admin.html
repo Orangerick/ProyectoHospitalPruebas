@@ -147,16 +147,16 @@
                     <input type="text" id="m-nombre">
                 </div>
                 <div class="form-group">
-                    <label>Usuario (Acceso)</label>
-                    <input type="text" id="m-user">
+                    <label>Correo Electrónico (Login)</label>
+                    <input type="email" id="m-email">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="m-tel" placeholder="10 dígitos" maxlength="10">
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
                     <input type="password" id="m-pass">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="m-email">
                 </div>
                 <div class="form-group">
                     <label>Cédula Profesional</label>
@@ -230,6 +230,40 @@
                 <button class="btn-secondary" id="btn-close-edit-paciente">Cancelar</button>
                 <button class="btn-danger" id="btn-delete-paciente-modal">Eliminar Paciente</button>
                 <button class="btn-primary" id="btn-update-paciente">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles/Edición Medico (HU13 y HU14) -->
+    <div id="modal-detalle-medico" class="modal hidden">
+        <div class="modal-content">
+            <h3>Detalles / Editar Médico</h3>
+            <input type="hidden" id="edit-m-id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="edit-m-nombre">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico (Login)</label>
+                    <input type="email" id="edit-m-email">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="edit-m-tel" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Cédula Profesional</label>
+                    <input type="text" id="edit-m-cedula">
+                </div>
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <select id="edit-m-especialidad"></select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-edit-medico">Cancelar</button>
+                <button class="btn-primary" id="btn-update-medico">Guardar Cambios</button>
             </div>
         </div>
     </div>

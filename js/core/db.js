@@ -8,15 +8,16 @@ const DB = {
     // Estado inicial del sistema
     state: {
         usuarios: [
-            { id: 'admin_1', user: 'admin', email: 'admin@hospital.mx', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
-            { id: 'usr_doc_test', user: 'doctor', email: 'doctor@hospital.mx', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
-            { id: 'usr_pac_test', user: 'paciente', email: 'paciente@hospital.mx', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
+            { id: 'admin_1', email: 'admin@hospital.mx', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
+            { id: 'usr_doc_test', email: 'doctor@hospital.mx', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
+            { id: 'usr_pac_test', email: 'paciente@hospital.mx', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
         ],
         pacientes: [
             { id: 'pac_test', usuarioId: 'usr_pac_test', nombre: 'Juan Prueba', email: 'juan@prueba.com', telefono: '555-1234', fechaRegistro: new Date().toISOString(), activo: true }
         ],
         medicos: [
-            { id: 'med_test', usuarioId: 'usr_doc_test', cedula: '12345678', especialidadId: 1, email: 'dr.casa@hospital.com', activo: true }
+            // Agregamos el campo 'telefono' y alineamos el email con el usuario
+            { id: 'med_test', usuarioId: 'usr_doc_test', cedula: '12345678', especialidadId: 1, email: 'doctor@hospital.mx', telefono: '555-9876543', activo: true }
         ],
         especialidades: [
             { id: 1, nombre: 'Medicina General' },
@@ -35,23 +36,28 @@ const DB = {
         const localData = localStorage.getItem('hospital_db');
         if (localData) {
             this.state = JSON.parse(localData);
-            
+
             // Asegurar que los usuarios de prueba existan/se actualicen (solo para desarrollo)
             const testUsers = [
-                { id: 'admin_1', user: 'admin', email: 'admin@hospital.mx', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
-                { id: 'usr_doc_test', user: 'doctor', email: 'doctor@hospital.mx', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
-                { id: 'usr_pac_test', user: 'paciente', email: 'paciente@hospital.mx', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
+                { id: 'admin_1', email: 'admin@hospital.mx', pass: '87614448187757d0', rol: 'admin', nombre: 'Administrador General', activo: true },
+                { id: 'usr_doc_test', email: 'doctor@hospital.mx', pass: 'b86a2ac8d76e9392', rol: 'medico', nombre: 'Dr. Casa (Prueba)', activo: true },
+                { id: 'usr_pac_test', email: 'paciente@hospital.mx', pass: '6fa0c2042b5c4dd0', rol: 'paciente', nombre: 'Juan Prueba', activo: true }
             ];
 
             testUsers.forEach(tu => {
-                const idx = this.state.usuarios.findIndex(u => u.user === tu.user);
-                if (idx !== -1) this.state.usuarios[idx] = tu;
-                else this.state.usuarios.push(tu);
+                // Ahora validamos la existencia del usuario usando el email en lugar de 'user'
+                const idx = this.state.usuarios.findIndex(u => u.email === tu.email);
+                if (idx !== -1) {
+                    // Actualizamos para limpiar rastros de la propiedad 'user' antigua
+                    this.state.usuarios[idx] = tu;
+                } else {
+                    this.state.usuarios.push(tu);
+                }
             });
 
             // Asegurar perfiles de prueba
             if (!this.state.medicos.some(m => m.id === 'med_test')) {
-                this.state.medicos.push({ id: 'med_test', usuarioId: 'usr_doc_test', cedula: '12345678', especialidadId: 1, email: 'dr.casa@hospital.com', activo: true });
+                this.state.medicos.push({ id: 'med_test', usuarioId: 'usr_doc_test', cedula: '12345678', especialidadId: 1, email: 'doctor@hospital.mx', telefono: '555-9876543', activo: true });
             }
             if (!this.state.pacientes.some(p => p.id === 'pac_test')) {
                 this.state.pacientes.push({ id: 'pac_test', usuarioId: 'usr_pac_test', nombre: 'Juan Prueba', email: 'juan@prueba.com', telefono: '555-1234', fechaRegistro: new Date().toISOString(), activo: true });
@@ -77,11 +83,12 @@ const DB = {
         try {
             sesion = JSON.parse(sessionStorage.getItem('hospital_sesion'));
         } catch(e) {}
-        
+
         const log = {
             id: Date.now(),
             fecha: new Date().toISOString(),
-            usuario: sesion ? sesion.user : 'Sistema/Anonimo',
+            // Cambiamos sesion.user a sesion.email porque el campo user ya no existe
+            usuario: sesion ? sesion.email : 'Sistema/Anonimo',
             rol: sesion ? sesion.rol : 'N/A',
             accion: accion,
             detalle: detalle
@@ -92,7 +99,7 @@ const DB = {
     },
 
     // --- Helpers CRUD Genéricos ---
-    
+
     add(coleccion, item) {
         this.state[coleccion].push(item);
         this.save();
