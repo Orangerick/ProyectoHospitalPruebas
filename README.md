@@ -6,7 +6,6 @@
 ---
 
 ## 👥 Equipo de Desarrollo: "Tortugas Ninja"
-*(Instrucción: Completa con los nombres de los 7 integrantes)*
 
 1. **Arrieta Flores Alan Alejandro** - Dev 1
 2. **Barrera Jiménez Christian** - Product Owner(Dios del software)
