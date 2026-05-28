@@ -1,6 +1,6 @@
 // js/core/auth.js
 import DB from './db.js';
-import { hashPwd } from './utils.js';
+import { hashPwd, validarEmail } from './utils.js';
 
 /**
  * Gestión de Autenticación y RBAC (Regla 2)
@@ -71,6 +71,11 @@ const Auth = {
         const regexTelefono = /^\d{10}$/;
         if (!datos.telefono || !regexTelefono.test(datos.telefono)) {
             throw new Error("El teléfono debe contener exactamente 10 dígitos numéricos.");
+        }
+
+        // Validación del formato de correo (que contenga al menos un @)
+        if (!validarEmail(datos.email)) {
+            throw new Error("Formato de correo electrónico inválido (falta el símbolo @).");
         }
 
         // Simulación de restricción UNIQUE de la base de datos

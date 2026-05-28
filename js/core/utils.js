@@ -31,3 +31,8 @@ export const validarCedula = (cedula) => {
     // Validación genérica: al menos 7 u 8 dígitos numéricos
     return /^[0-9]{7,10}$/.test(cedula);
 };
+
+export const validarEmail = (email) => {
+    // Validación flexible: Requiere texto, un arroba (@) y texto después. No fuerza el .com
+    return /^[^\s@]+@[^\s@]+$/.test(email);
+};

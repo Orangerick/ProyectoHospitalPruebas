@@ -1,6 +1,6 @@
 // js/modules/medicos.js
 import DB from '../core/db.js';
-import { generarID, hashPwd, validarCedula } from '../core/utils.js';
+import { generarID, hashPwd, validarCedula, validarEmail } from '../core/utils.js';
 
 /**
  * Lógica de Negocio para Médicos (Exclusivo Admin)
@@ -11,6 +11,11 @@ const MedicosModulo = {
      * HU11: Fuera la casilla de usuario, pedir teléfono y usar correo para el login.
      */
     registrarMedico(datos) {
+        // Validación del correo
+        if (!validarEmail(datos.email)) {
+            throw new Error("Formato de correo electrónico inválido (falta el símbolo @).");
+        }
+
         if (!validarCedula(datos.cedula)) throw new Error("Cédula profesional inválida.");
 
         // HU11: Verificar si el correo ya existe en lugar del 'user'
