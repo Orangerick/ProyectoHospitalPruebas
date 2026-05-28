@@ -13,6 +13,11 @@ const PacientesModulo = {
             throw new Error("Error: El correo electrónico ya se encuentra registrado con otro usuario.");
         }
 
+        const telExiste = DB.state.usuarios.some(u => u.telefono === datos.telefono);
+        if (telExiste) {
+            throw new Error("Error: El número telefónico ya se encuentra registrado con otro usuario.");
+        }
+
         const userId = generarID('usr_p'); // Generación de ID único para el usuario
         
         // 2. Crear Cuenta de Usuario asignando automáticamente el rol 'paciente'
@@ -113,28 +118,44 @@ const PacientesModulo = {
     /**
      * HU9: Actualizar información del paciente
      */
-    actualizarPaciente(pacienteId, datos) {
+    actualizarPaciente(pacienteId, nuevosDatos) {
         const pIdx = DB.state.pacientes.findIndex(p => p.id === pacienteId);
         if (pIdx === -1) return false;
         
         const pacienteActual = DB.state.pacientes[pIdx];
 
+        // Validación de teléfono único excluyendo al usuario actual (HU9/HU4)
+        if (nuevosDatos.telefono && nuevosDatos.telefono !== pacienteActual.telefono) {
+            const telEnUso = DB.state.usuarios.some(u => u.telefono === nuevosDatos.telefono && u.id !== pacienteActual.usuarioId);
+            if (telEnUso) {
+                throw new Error("Error: El número telefónico ya pertenece a otro usuario.");
+            }
+        }
+
         const pacienteActualizado = {
             ...pacienteActual,
-            nombre: datos.nombre || pacienteActual.nombre,
-            email: datos.email || pacienteActual.email,
-            telefono: datos.telefono || pacienteActual.telefono,
-            direccion: datos.direccion || pacienteActual.direccion,
+            nombre: nuevosDatos.nombre || pacienteActual.nombre,
+            email: nuevosDatos.email || pacienteActual.email,
+            telefono: nuevosDatos.telefono || pacienteActual.telefono,
+            direccion: nuevosDatos.direccion || pacienteActual.direccion,
         };
 
         DB.state.pacientes[pIdx] = pacienteActualizado;
 
-        // Nota: Solo sincronizamos email/tel si el usuario existe
-        DB.update('usuarios', pacienteActual.usuarioId, { 
-            nombre: datos.nombre || pacienteActual.nombre,
-            email: datos.email,
-            telefono: datos.telefono 
-        });
+        // Sincronizar con entidad Usuario
+        const updateUserData = {
+            nombre: pacienteActualizado.nombre,
+            email: pacienteActualizado.email,
+            telefono: pacienteActualizado.telefono
+        };
+
+        // Verificación de nueva contraseña (HU4)
+        // Si el campo viene incluido y no está vacío, lo hasheamos y actualizamos
+        if (nuevosDatos.pass && nuevosDatos.pass.trim() !== "") {
+            updateUserData.pass = hashPwd(nuevosDatos.pass);
+        }
+
+        DB.update('usuarios', pacienteActual.usuarioId, updateUserData);
 
         DB.save();
         DB.registrarLog('Edición Paciente', `Información actualizada para: ${pacienteActualizado.nombre}`);

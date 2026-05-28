@@ -23,6 +23,10 @@ const MedicosModulo = {
             throw new Error("El correo electrónico ya está registrado.");
         }
 
+        if (DB.state.usuarios.find(u => u.telefono === datos.telefono)) {
+            throw new Error("El número telefónico ya está registrado.");
+        }
+
         const userId = generarID('doc_u');
 
         // 1. Crear la cuenta de acceso (Se elimina 'user', usamos 'email')
@@ -93,6 +97,13 @@ const MedicosModulo = {
         if (nuevosDatos.email && nuevosDatos.email !== medico.email) {
             if (DB.state.usuarios.find(u => u.email === nuevosDatos.email && u.id !== medico.usuarioId)) {
                 throw new Error("El nuevo correo ya está en uso por otra cuenta.");
+            }
+        }
+
+        // Validar unicidad de teléfono (HU14)
+        if (nuevosDatos.telefono && nuevosDatos.telefono !== medico.telefono) {
+            if (DB.state.usuarios.find(u => u.telefono === nuevosDatos.telefono && u.id !== medico.usuarioId)) {
+                throw new Error("El nuevo número telefónico ya está en uso por otra cuenta.");
             }
         }
 

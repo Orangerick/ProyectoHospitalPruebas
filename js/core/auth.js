@@ -84,6 +84,12 @@ const Auth = {
             throw new Error("Error: El correo electrónico ya se encuentra registrado.");
         }
 
+        // Validación de teléfono único
+        const telefonoExiste = DB.state.usuarios.some(u => u.telefono === datos.telefono);
+        if (telefonoExiste) {
+            throw new Error("Error: El número telefónico ya se encuentra registrado con otro usuario.");
+        }
+
         // 1. Crear Usuario
         const userId = 'usr_' + Date.now();
         const nuevoUsuario = {

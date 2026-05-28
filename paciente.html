@@ -79,6 +79,24 @@
                                 <input type="text" id="p-direccion" placeholder="Ingresa tu dirección completa">
                             </div>
                         </div>
+
+                        <h3 style="margin-top: 2rem; border-top: 1px solid #eee; pt: 1rem;">Seguridad</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nueva Contraseña</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="password" id="p-pass" placeholder="Dejar en blanco para no cambiar" style="flex: 1;">
+                                    <button type="button" class="btn-secondary btn-toggle-pass" data-target="p-pass" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar Nueva Contraseña</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="password" id="p-pass-confirm" placeholder="Repite la contraseña" style="flex: 1;">
+                                    <button type="button" class="btn-secondary btn-toggle-pass" data-target="p-pass-confirm" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                                </div>
+                            </div>
+                        </div>
                         <button class="btn-primary" id="btn-save-perfil">Actualizar Perfil</button>
                     </div>
                 </section>
