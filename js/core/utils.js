@@ -36,3 +36,8 @@ export const validarEmail = (email) => {
     // Validación flexible: Requiere texto, un arroba (@) y texto después. No fuerza el .com
     return /^[^\s@]+@[^\s@]+$/.test(email);
 };
+
+export const validarPassword = (pass) => {
+    // Mínimo 8 caracteres, al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (@$!%?&)
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&]).{8,}$/.test(pass);
+};

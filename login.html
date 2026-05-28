@@ -24,7 +24,10 @@
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" id="login-pass" placeholder="••••••••">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="password" id="login-pass" placeholder="••••••••" style="flex: 1;">
+                        <button type="button" class="btn-secondary btn-toggle-pass" data-target="login-pass" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                    </div>
                 </div>
                 <button class="btn-primary" id="btn-login">Entrar al Sistema</button>
                 
@@ -58,7 +61,10 @@
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" id="reg-pass" placeholder="Crea una clave segura">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="password" id="reg-pass" placeholder="Crea una clave segura" style="flex: 1;">
+                        <button type="button" class="btn-secondary btn-toggle-pass" data-target="reg-pass" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                    </div>
                 </div>
                 <button class="btn-success" id="btn-register-confirm">Crear mi Cuenta</button>
                 <div class="auth-footer">
@@ -86,7 +92,10 @@
                     </div>
                     <div class="form-group">
                         <label>Nueva Contraseña</label>
-                        <input type="password" id="recover-new-pass" placeholder="Mínimo 6 caracteres">
+                        <div style="display: flex; gap: 5px;">
+                            <input type="password" id="recover-new-pass" placeholder="Mínimo 8 caracteres" style="flex: 1;">
+                            <button type="button" class="btn-secondary btn-toggle-pass" data-target="recover-new-pass" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                        </div>
                     </div>
                     <button class="btn-success" id="btn-recover-save">Guardar Nueva Contraseña</button>
                 </div>

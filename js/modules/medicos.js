@@ -76,6 +76,17 @@ const MedicosModulo = {
         const medico = DB.state.medicos.find(m => m.id === medicoId);
         if (!medico) return false;
 
+        // Validaciones de formato (HU14 - Seguridad)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const cedulaRegex = /^\d{7,8}$/;
+
+        if (nuevosDatos.email && !emailRegex.test(nuevosDatos.email)) {
+            throw new Error("Formato de correo electrónico inválido.");
+        }
+        if (nuevosDatos.cedula && !cedulaRegex.test(nuevosDatos.cedula)) {
+            throw new Error("La cédula profesional debe ser numérica y tener entre 7 y 8 dígitos.");
+        }
+
         const usuario = DB.state.usuarios.find(u => u.id === medico.usuarioId);
 
         // Validar que si cambia el correo, no choque con otro existente
