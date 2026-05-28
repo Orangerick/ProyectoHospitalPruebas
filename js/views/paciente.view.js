@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        body.innerHTML = misCitas.map(c => {
+        body.innerHTML = misCitas.sort((a,b) => b.fecha.localeCompare(a.fecha)).map(c => {
             const med = DB.state.medicos.find(m => m.id === c.medicoId);
             const medUser = med ? DB.state.usuarios.find(u => u.id === med.usuarioId) : null;
             return `
@@ -56,11 +56,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>Dr. ${medUser ? medUser.nombre : 'N/A'}</td>
                     <td><span class="badge ${c.estado === 'cancelada' ? 'badge-danger' : 'badge-success'}">${c.estado}</span></td>
                     <td>
-                        ${c.estado === 'confirmada' ? `<button class="btn-danger btn-small" onclick="alert('Cancelar cita en desarrollo')">Cancelar</button>` : ''}
+                        ${c.estado === 'confirmada' ? `
+                            <button class="btn-warning btn-small btn-repro-cita" data-id="${c.id}">Reprogramar</button>
+                            <button class="btn-danger btn-small btn-cancel-cita" data-id="${c.id}">Cancelar</button>
+                        ` : ''}
                     </td>
                 </tr>
             `;
         }).join('');
+
+        // Eventos delegados
+        document.querySelectorAll('.btn-cancel-cita').forEach(btn => {
+            btn.onclick = () => {
+                if (confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
+                    CitasModulo.cancelarCita(btn.dataset.id);
+                    renderCitas();
+                }
+            };
+        });
+
+        document.querySelectorAll('.btn-repro-cita').forEach(btn => {
+            btn.onclick = () => {
+                const cita = DB.state.citas.find(x => x.id === btn.dataset.id);
+                document.getElementById('repro-cita-id').value = cita.id;
+                document.getElementById('repro-fecha').value = cita.fecha;
+                document.getElementById('repro-fecha').min = new Date().toISOString().split('T')[0];
+                document.getElementById('modal-reprogramar').classList.remove('hidden');
+            };
+        });
+    };
+
+    // Lógica Modal Reprogramar
+    document.getElementById('btn-close-repro').onclick = () => document.getElementById('modal-reprogramar').classList.add('hidden');
+    document.getElementById('btn-save-repro').onclick = () => {
+        const id = document.getElementById('repro-cita-id').value;
+        const fecha = document.getElementById('repro-fecha').value;
+        const hora = document.getElementById('repro-hora').value;
+
+        try {
+            CitasModulo.reprogramarCita(id, fecha, hora);
+            document.getElementById('modal-reprogramar').classList.add('hidden');
+            renderCitas();
+            alert("Cita reprogramada con éxito.");
+        } catch (e) {
+            alert(e.message);
+        }
     };
 
     const renderHistorial = () => {
@@ -95,6 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const e = DB.state.especialidades.find(esp => esp.id === m.especialidadId);
             return `<option value="${m.id}">Dr. ${u ? u.nombre : 'N/A'} (${e ? e.nombre : 'N/A'})</option>`;
         }).join('');
+        
+        // Bloquear fechas pasadas en el calendario
+        document.getElementById('c-fecha').min = new Date().toISOString().split('T')[0];
         modal.classList.remove('hidden');
     };
 

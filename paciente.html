@@ -118,6 +118,32 @@
         </div>
     </div>
 
+    <!-- Modal Reprogramar (HU19) -->
+    <div id="modal-reprogramar" class="modal hidden">
+        <div class="modal-content">
+            <h3>Reprogramar Cita</h3>
+            <p id="repro-info">Selecciona el nuevo horario.</p>
+            <input type="hidden" id="repro-cita-id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nueva Fecha</label>
+                    <input type="date" id="repro-fecha">
+                </div>
+                <div class="form-group">
+                    <label>Nueva Hora</label>
+                    <select id="repro-hora">
+                        <option>09:00</option><option>10:00</option><option>11:00</option>
+                        <option>12:00</option><option>16:00</option><option>17:00</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-repro">Cancelar</button>
+                <button class="btn-primary" id="btn-save-repro">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="js/views/paciente.view.js"></script>
 </body>
 </html>
