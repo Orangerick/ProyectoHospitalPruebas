@@ -4,7 +4,7 @@ import DB from '../core/db.js';
 import MedicosModulo from '../modules/medicos.js';
 import PacientesModulo from '../modules/pacientes.js';
 import AuditoriaModulo from '../modules/auditoria.js';
-import { formatearFecha } from '../core/utils.js';
+import { formatearFecha, validarPassword } from '../core/utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Proteger ruta
@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${isBlocked ? '<span class="badge badge-danger">Bloqueado</span>' : ''}
                 </td>
                 <td>
+                    <button class="btn-small btn-view-p" data-id="${p.id}" style="background-color: #0ea5e9; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Ver Detalles</button>
                     <button class="btn-primary btn-small btn-edit-p" data-id="${p.id}">Editar</button>
                     <button class="btn-warning btn-small btn-toggle-p" data-id="${p.id}">${p.activo ? 'Desactivar' : 'Activar'}</button>
                     <button class="btn-danger btn-small btn-delete-p" data-id="${p.id}">Eliminar</button>
@@ -75,6 +76,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).join('');
 
         // Eventos de la lista
+        document.querySelectorAll('.btn-view-p').forEach(btn => {
+            btn.onclick = () => abrirModalVisualizar('paciente', btn.dataset.id);
+        });
+
         document.querySelectorAll('.btn-toggle-p').forEach(btn => {
             btn.onclick = () => {
                 PacientesModulo.toggleEstado(btn.dataset.id);
@@ -128,6 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${isBlocked ? '<span class="badge badge-danger">Bloqueado</span>' : ''}
                     </td>
                     <td>
+                        <button class="btn-small btn-view-m" data-id="${m.id}" style="background-color: #0ea5e9; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Ver Detalles</button>
                         <button class="btn-primary btn-small btn-edit-m" data-id="${m.id}">Editar</button>
                         <button class="btn-warning btn-small btn-toggle-m" data-id="${m.id}">${m.activo ? 'Desactivar' : 'Activar'}</button>
                         ${isBlocked ? `<button class="btn-success btn-small btn-unlock-m" data-id="${m.id}">Desbloquear</button>` : ''}
@@ -137,6 +143,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).join('');
 
         // Eventos
+        document.querySelectorAll('.btn-view-m').forEach(btn => {
+            btn.onclick = () => abrirModalVisualizar('medico', btn.dataset.id);
+        });
+
         document.querySelectorAll('.btn-toggle-m').forEach(btn => {
             btn.onclick = () => {
                 MedicosModulo.toggleEstado(btn.dataset.id);
@@ -213,6 +223,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             return alert("El teléfono debe contener exactamente 10 dígitos.");
         }
 
+        if (!validarPassword(datos.pass)) {
+            return alert("Seguridad insuficiente: La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%?&).");
+        }
+
         try {
             MedicosModulo.registrarMedico(datos);
             modal.classList.add('hidden');
@@ -254,6 +268,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-update-medico').onclick = () => {
         const id = document.getElementById('edit-m-id').value;
         const telRegex = /^\d{10}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const cedulaRegex = /^\d{7,8}$/;
 
         const datos = {
             nombre: document.getElementById('edit-m-nombre').value.trim(),
@@ -265,6 +281,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!datos.nombre || !datos.email || !datos.telefono || !datos.cedula) {
             return alert("Todos los campos son obligatorios.");
+        }
+
+        if (!emailRegex.test(datos.email)) {
+            return alert("Formato de correo electrónico inválido.");
+        }
+
+        if (!cedulaRegex.test(datos.cedula)) {
+            return alert("La cédula profesional debe ser numérica y tener entre 7 y 8 dígitos.");
         }
 
         if (!telRegex.test(datos.telefono)) {
@@ -310,6 +334,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!telRegex.test(datos.telefono)) {
             return alert("El teléfono debe contener exactamente 10 dígitos.");
+        }
+
+        if (!validarPassword(datos.pass)) {
+            return alert("Seguridad insuficiente: La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%?&).");
         }
 
         try {
@@ -400,6 +428,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderAuditoria();
         }
     };
+
+    // --- Lógica de Visualización de Detalles (Solo Lectura) ---
+    const modalVisualizar = document.getElementById('modal-visualizar');
+    const viewContainer = document.getElementById('view-fields-container');
+
+    const abrirModalVisualizar = (tipo, id) => {
+        viewContainer.innerHTML = '';
+        let campos = '';
+
+        if (tipo === 'paciente') {
+            const p = DB.state.pacientes.find(x => x.id === id);
+            document.getElementById('view-modal-title').textContent = 'Ficha del Paciente';
+            campos = `
+                <div class="form-group"><label>Nombre Completo</label><input type="text" value="${p.nombre}" readonly></div>
+                <div class="form-group"><label>Email</label><input type="text" value="${p.email}" readonly></div>
+                <div class="form-group"><label>Teléfono</label><input type="text" value="${p.telefono}" readonly></div>
+                <div class="form-group"><label>Dirección</label><input type="text" value="${p.direccion || 'No proporcionada'}" readonly></div>
+            `;
+        } else if (tipo === 'medico') {
+            const m = MedicosModulo.obtenerMedico(id);
+            const esp = DB.state.especialidades.find(e => e.id === m.especialidadId);
+            document.getElementById('view-modal-title').textContent = 'Ficha del Médico';
+            campos = `
+                <div class="form-group"><label>Nombre Completo</label><input type="text" value="${m.nombre}" readonly></div>
+                <div class="form-group"><label>Email</label><input type="text" value="${m.email}" readonly></div>
+                <div class="form-group"><label>Teléfono</label><input type="text" value="${m.telefono || 'N/A'}" readonly></div>
+                <div class="form-group"><label>Cédula Profesional</label><input type="text" value="${m.cedula}" readonly></div>
+                <div class="form-group"><label>Especialidad</label><input type="text" value="${esp ? esp.nombre : 'N/A'}" readonly></div>
+            `;
+        }
+
+        viewContainer.innerHTML = campos;
+        modalVisualizar.classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-visualizar').onclick = () => modalVisualizar.classList.add('hidden');
+
+    // --- Funcionalidad Mostrar/Ocultar Contraseña ---
+    document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
+        btn.onclick = () => {
+            const targetId = btn.dataset.target;
+            const input = document.getElementById(targetId);
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.textContent = isPassword ? 'Ocultar' : 'Ver';
+        };
+    });
 
     // Inicializar vista
     renderStats();

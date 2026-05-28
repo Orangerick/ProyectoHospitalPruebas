@@ -156,7 +156,10 @@
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" id="m-pass">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="password" id="m-pass" style="flex: 1;">
+                        <button type="button" class="btn-secondary btn-toggle-pass" data-target="m-pass" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Cédula Profesional</label>
@@ -193,7 +196,10 @@
                 </div>
                 <div class="form-group">
                     <label>Contraseña Temporal</label>
-                    <input type="password" id="ap-pass" placeholder="••••••••">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="password" id="ap-pass" placeholder="••••••••" style="flex: 1;">
+                        <button type="button" class="btn-secondary btn-toggle-pass" data-target="ap-pass" style="width: auto; padding: 0 10px; font-size: 0.8rem;">Ver</button>
+                    </div>
                 </div>
             </div>
             <div class="modal-actions">
@@ -264,6 +270,19 @@
             <div class="modal-actions">
                 <button class="btn-secondary" id="btn-close-edit-medico">Cancelar</button>
                 <button class="btn-primary" id="btn-update-medico">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Visualización de Detalles (HU8 y HU13) -->
+    <div id="modal-visualizar" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="view-modal-title">Detalles</h3>
+            <div class="form-grid" id="view-fields-container">
+                <!-- Contenido generado dinámicamente -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btn-close-visualizar">Cerrar</button>
             </div>
         </div>
     </div>

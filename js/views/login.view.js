@@ -1,5 +1,6 @@
 // js/views/login.view.js
 import Auth from '../core/auth.js';
+import { validarPassword } from '../core/utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Referencias DOM
@@ -78,6 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return showMsg("El teléfono debe contener exactamente 10 dígitos numéricos.");
         }
 
+        if (!validarPassword(datos.pass)) {
+            return showMsg("La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial (@$!%?&).");
+        }
+
         try {
             Auth.registerPaciente(datos);
             showMsg("¡Cuenta creada! Ya puedes iniciar sesión.", "success");
@@ -110,6 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!email || !pass) return showMsg("Completa todos los campos obligatorios.");
 
+        if (!validarPassword(pass)) {
+            return showMsg("La nueva contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial (@$!%?&).");
+        }
+
         try {
             Auth.validarYCambiarPassword(tel, email, pass);
             showMsg("¡Contraseña actualizada con éxito! Redirigiendo...", "success");
@@ -122,4 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
             showMsg(e.message);
         }
     };
+
+    // --- Funcionalidad Mostrar/Ocultar Contraseña ---
+    document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
+        btn.onclick = () => {
+            const targetId = btn.dataset.target;
+            const input = document.getElementById(targetId);
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.textContent = isPassword ? 'Ocultar' : 'Ver';
+        };
+    });
 });

@@ -3,6 +3,7 @@ import Auth from '../core/auth.js';
 import DB from '../core/db.js';
 import CitasModulo from '../modules/citas.js';
 import PacientesModulo from '../modules/pacientes.js';
+import { validarPassword } from '../core/utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     Auth.checkGuard();
@@ -173,22 +174,60 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('btn-save-perfil').onclick = () => {
-        const nuevaDir = document.getElementById('p-direccion').value.trim();
-        
-        if (!nuevaDir) {
-            alert("Por favor, ingresa una dirección válida.");
+        const datos = {
+            email: document.getElementById('p-email').value.trim(),
+            telefono: document.getElementById('p-tel').value.trim(),
+            direccion: document.getElementById('p-direccion').value.trim()
+        };
+
+        const newPass = document.getElementById('p-pass').value;
+        const confirmPass = document.getElementById('p-pass-confirm').value;
+
+        // Validación de campos básicos
+        if (!datos.email || !datos.telefono) {
+            alert("Email y Teléfono son campos obligatorios.");
             return;
         }
 
-        const exito = PacientesModulo.actualizarDireccion(miPerfil.id, nuevaDir);
-        
-        if (exito) {
-            alert("¡Perfil actualizado con éxito! Tu dirección ha sido sincronizada.");
-            renderSection('sec-perfil'); // Refrescar datos en pantalla
+        // Lógica de validación de contraseña (si el usuario intentó escribir algo)
+        if (newPass || confirmPass) {
+            if (newPass !== confirmPass) {
+                alert("Las contraseñas no coinciden.");
+                return;
+            }
+            if (!validarPassword(newPass)) {
+                alert("La nueva contraseña no cumple con los requisitos de seguridad (mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial).");
+                return;
+            }
+            datos.pass = newPass; // Se agrega al objeto solo si es válida
+        }
+
+        try {
+            const actualizado = PacientesModulo.actualizarPaciente(miPerfil.id, datos);
+            if (actualizado) {
+                alert("¡Perfil actualizado con éxito!");
+                // Limpiar campos de contraseña
+                document.getElementById('p-pass').value = '';
+                document.getElementById('p-pass-confirm').value = '';
+                renderSection('sec-perfil');
+            }
+        } catch (e) {
+            alert(e.message);
         }
     };
 
     document.getElementById('btn-logout').onclick = () => Auth.logout();
     
     renderCitas();
+
+    // --- Funcionalidad Mostrar/Ocultar Contraseña ---
+    document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
+        btn.onclick = () => {
+            const targetId = btn.dataset.target;
+            const input = document.getElementById(targetId);
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.textContent = isPassword ? 'Ocultar' : 'Ver';
+        };
+    });
 });

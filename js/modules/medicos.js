@@ -23,6 +23,10 @@ const MedicosModulo = {
             throw new Error("El correo electrónico ya está registrado.");
         }
 
+        if (DB.state.usuarios.find(u => u.telefono === datos.telefono)) {
+            throw new Error("El número telefónico ya está registrado.");
+        }
+
         const userId = generarID('doc_u');
 
         // 1. Crear la cuenta de acceso (Se elimina 'user', usamos 'email')
@@ -76,12 +80,30 @@ const MedicosModulo = {
         const medico = DB.state.medicos.find(m => m.id === medicoId);
         if (!medico) return false;
 
+        // Validaciones de formato (HU14 - Seguridad)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const cedulaRegex = /^\d{7,8}$/;
+
+        if (nuevosDatos.email && !emailRegex.test(nuevosDatos.email)) {
+            throw new Error("Formato de correo electrónico inválido.");
+        }
+        if (nuevosDatos.cedula && !cedulaRegex.test(nuevosDatos.cedula)) {
+            throw new Error("La cédula profesional debe ser numérica y tener entre 7 y 8 dígitos.");
+        }
+
         const usuario = DB.state.usuarios.find(u => u.id === medico.usuarioId);
 
         // Validar que si cambia el correo, no choque con otro existente
         if (nuevosDatos.email && nuevosDatos.email !== medico.email) {
             if (DB.state.usuarios.find(u => u.email === nuevosDatos.email && u.id !== medico.usuarioId)) {
                 throw new Error("El nuevo correo ya está en uso por otra cuenta.");
+            }
+        }
+
+        // Validar unicidad de teléfono (HU14)
+        if (nuevosDatos.telefono && nuevosDatos.telefono !== medico.telefono) {
+            if (DB.state.usuarios.find(u => u.telefono === nuevosDatos.telefono && u.id !== medico.usuarioId)) {
+                throw new Error("El nuevo número telefónico ya está en uso por otra cuenta.");
             }
         }
 
